@@ -106,18 +106,66 @@ const wallMaterial = new THREE.MeshBasicMaterial({ color: 0x808080 })
 const wallGeometry = new THREE.PlaneGeometry(200, 20) // Increased from 100,10 to 200,20
 
 const leftWall = new THREE.Mesh(wallGeometry, wallMaterial)
-leftWall.position.set(-100, 10, 0) // Adjusted x from -50 to -100, y from 5 to 10
+leftWall.position.set(-50, 10, 0) // Changed x from -100 to -50
 leftWall.rotation.y = Math.PI / 2
 scene.add(leftWall)
 
-const rightWall = new THREE.Mesh(wallGeometry, wallMaterial)
-rightWall.position.set(100, 10, 0) // Adjusted x from 50 to 100, y from 5 to 10
-rightWall.rotation.y = -Math.PI / 2
-scene.add(rightWall)
+const textureLoader = new THREE.TextureLoader()
+const paintings = [
+  'positano_painting.webp',
+  'paint2.webp',
+  'paint3.jpg',
+  'paint4.jpg',
+  'paint5.jpg',
+  'paint6.jpg',
+  'paint7.jpg',
+]
 
-// Modify camera initial position and rotation
-camera.position.set(0, 100, 0)  // Higher Y position, Z at 0 for top-down view
-camera.rotation.x = -Math.PI / 2  // Rotate camera to look straight down
+const PAINTING_WIDTH = 20
+const PAINTING_SPACING = 25
+const PAINTING_HEIGHT = 20
+
+// Calculate positions for horizontal layout
+function getPaintingPosition(index: number, totalPaintings: number) {
+  // Calculate z-position (along the wall)
+  const totalWidth = totalPaintings * PAINTING_SPACING
+  const startZ = -totalWidth / 2 + PAINTING_SPACING/2
+  const z = startZ + (index * PAINTING_SPACING)
+  
+  // Fixed height for all paintings
+  const y = 10  // Center height on wall
+  
+  return { y, z }
+}
+
+// Create paintings for both walls
+paintings.forEach((paintingFile, index) => {
+  const paintingTexture = textureLoader.load(
+    paintingFile,
+    undefined,
+    undefined,
+    (error) => console.error('Error loading texture:', error)
+  )
+
+  const paintingGeometry = new THREE.PlaneGeometry(PAINTING_WIDTH, PAINTING_HEIGHT)
+  const paintingMaterial = new THREE.MeshBasicMaterial({ map: paintingTexture })
+  const painting = new THREE.Mesh(paintingGeometry, paintingMaterial)
+  
+  const position = getPaintingPosition(index, paintings.length)
+  painting.position.set(49.9, position.y, position.z)
+  painting.rotation.y = -Math.PI / 2
+  scene.add(painting)
+
+  // Create a copy for the left wall
+  const paintingCopy = painting.clone()
+  paintingCopy.position.set(-49.9, position.y, position.z)
+  paintingCopy.rotation.y = Math.PI / 2
+  scene.add(paintingCopy)
+})
+
+// Modify initial camera position and rotation
+camera.position.set(0, 2, 0)  // Changed from (0, 100, 0) to be at human height
+camera.rotation.x = 0  // Changed from -Math.PI / 2 to look straight ahead
 camera.rotation.y = 0
 camera.rotation.z = 0
 
@@ -136,10 +184,10 @@ window.addEventListener('keyup', (e) => {
   keys[e.key] = false
 })
 
-// Add after camera creation
-let isTopDown = true
+// Update isTopDown default state
+let isTopDown = false  // Changed from true to false
 
-// Add this function after camera setup
+// Update toggleView function
 function toggleView() {
   isTopDown = !isTopDown
   
