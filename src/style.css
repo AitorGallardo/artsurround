@@ -5,4 +5,17 @@
 
 body {
   overflow: hidden;
+}
+
+button {
+  padding: 10px 20px;
+  background: #333;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #444;
 } 
